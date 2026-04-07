@@ -1,0 +1,33 @@
+{
+  "prompt_version": "v3",
+  "model": "qwen/qwen2.5-72b-instruct:free",
+  "timestamp": "20260406_212617",
+  "total_cases": 5,
+  "results": {
+    "case_1_normal": {
+      "status": "error",
+      "category": "normal",
+      "error": "Error code: 400 - {'error': {'message': 'qwen/qwen2.5-72b-instruct:free is not a valid model ID', 'code': 400}, 'user_id': 'user_3AXeJ4xNLmMXHIrvvX1qGdgyzzy'}"
+    },
+    "case_2_normal": {
+      "status": "error",
+      "category": "normal",
+      "error": "Error code: 400 - {'error': {'message': 'qwen/qwen2.5-72b-instruct:free is not a valid model ID', 'code': 400}, 'user_id': 'user_3AXeJ4xNLmMXHIrvvX1qGdgyzzy'}"
+    },
+    "case_3_edge_mixed": {
+      "status": "error",
+      "category": "edge",
+      "error": "Error code: 400 - {'error': {'message': 'qwen/qwen2.5-72b-instruct:free is not a valid model ID', 'code': 400}, 'user_id': 'user_3AXeJ4xNLmMXHIrvvX1qGdgyzzy'}"
+    },
+    "case_4_hard_contradiction": {
+      "status": "error",
+      "category": "hard_fail",
+      "error": "Error code: 400 - {'error': {'message': 'qwen/qwen2.5-72b-instruct:free is not a valid model ID', 'code': 400}, 'user_id': 'user_3AXeJ4xNLmMXHIrvvX1qGdgyzzy'}"
+    },
+    "case_5_edge_sparse": {
+      "status": "error",
+      "category": "edge",
+      "error": "Error code: 400 - {'error': {'message': 'qwen/qwen2.5-72b-instruct:free is not a valid model ID', 'code': 400}, 'user_id': 'user_3AXeJ4xNLmMXHIrvvX1qGdgyzzy'}"
+    }
+  }
+}

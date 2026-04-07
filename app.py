@@ -20,9 +20,9 @@ from openai import OpenAI
 
 MODELS = [
     "nvidia/nemotron-3-super-120b-a12b:free",
-    "qwen/qwen2.5-72b-instruct:free",
-    "google/gemma-3-12b-it:free",
-    "meta-llama/llama-3.1-8b-instruct:free",
+    "qwen/qwen3.6-plus:free",
+    "minimax/minimax-m2.5:free",
+    "stepfun/step-3.5-flash:free",
 ]
 
 PROMPTS = {

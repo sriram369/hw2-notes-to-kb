@@ -1,0 +1,32 @@
+{
+  "prompt_version": "v3",
+  "timestamp": "20260406_211548",
+  "total_cases": 5,
+  "results": {
+    "case_1_normal": {
+      "status": "success",
+      "category": "normal",
+      "error": ""
+    },
+    "case_2_normal": {
+      "status": "success",
+      "category": "normal",
+      "error": ""
+    },
+    "case_3_edge_mixed": {
+      "status": "success",
+      "category": "edge",
+      "error": ""
+    },
+    "case_4_hard_contradiction": {
+      "status": "success",
+      "category": "hard_fail",
+      "error": ""
+    },
+    "case_5_edge_sparse": {
+      "status": "success",
+      "category": "edge",
+      "error": ""
+    }
+  }
+}

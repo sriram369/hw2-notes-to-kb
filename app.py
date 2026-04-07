@@ -18,6 +18,13 @@ from pathlib import Path
 from openai import OpenAI
 
 
+MODELS = [
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "qwen/qwen2.5-72b-instruct:free",
+    "google/gemma-3-12b-it:free",
+    "meta-llama/llama-3.1-8b-instruct:free",
+]
+
 PROMPTS = {
     "v1": {
         "system": "You are a helpful assistant that converts raw notes into structured knowledge-base entries.",
@@ -42,7 +49,7 @@ Here are the notes:
 {notes}""",
     },
     "v3": {
-        "system": "You are a knowledge management assistant. Convert raw, unstructured notes into structured, clean Markdown knowledge-base entries suitable for an Obsidian wiki.\n\nCritical rules:\n1. If the notes contain conflicting information, flag the conflict explicitly instead of silently picking one side.\n2. If the notes mix unrelated topics (business + personal), split them into separate entries or flag what's out of scope.\n3. If the notes are too sparse or cryptic to produce a meaningful entry, say so clearly and list what information is missing.\n4. Always preserve names, dates, and deadlines exactly as stated.\n5. Use Obsidian-style [[wikilinks]] for key entities, projects, and concepts.",
+        "system": "You are a knowledge management assistant. Convert raw, unstructured notes into structured, clean Markdown knowledge-base entries suitable for an Obsidian wiki.\n\nCritical rules:\n1. If the notes contain conflicting information, flag the conflict explicitly instead of silently picking one side.\n2. If the notes mix unrelated topics (business + personal), split them into separate entries or flag what's out of scope.\n3. If the notes are too sparse or cryptic to produce a meaningful entry, say so clearly and list what information is missing.\n4. Always preserve names, dates, and deadlines exactly as stated.\n5. Use Obsidian-style [[wikilinks]] for key entities, projects, and concepts.\n6. NEVER invent or hallucinate details not present in the notes. \"nadh\" is a person's name, not the NADH molecule. \"wssdk\" likely refers to a software SDK, not a chemical. If you don't know what something means, say so. Only use information explicitly stated in the notes.",
         "user": """Convert the following raw notes into a structured knowledge-base entry. Your output MUST follow this format exactly:
 
 ---
@@ -63,6 +70,7 @@ A concise 2-3 sentence summary.
 
 ## Action Items
 - [ ] Task description (assigned to: name, deadline: date if known)
+  NOTE: Only create action items that are explicitly stated or clearly implied in the notes. Do NOT invent tasks.
 
 ## Notes on Data Quality
 <!-- If there are contradictions, missing info, or mixed topics, note them here. Otherwise leave brief. -->
@@ -168,7 +176,7 @@ EVAL_CASES = {
 }
 
 
-def call_llm(notes: str, prompt_version: str = "v3") -> str:
+def call_llm(notes: str, prompt_version: str = "v3", model: str = "nvidia/nemotron-3-super-120b-a12b:free") -> str:
     """Send notes to the LLM and return the generated knowledge-base entry."""
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
@@ -184,7 +192,7 @@ def call_llm(notes: str, prompt_version: str = "v3") -> str:
     )
 
     response = client.chat.completions.create(
-        model="nvidia/nemotron-3-super-120b-a12b",
+        model=model,
         messages=[
             {"role": "system", "content": prompt["system"]},
             {"role": "user", "content": prompt["user"].format(notes=notes)},
@@ -196,16 +204,20 @@ def call_llm(notes: str, prompt_version: str = "v3") -> str:
     return response.choices[0].message.content
 
 
-def run_evaluation(prompt_version: str = "v3"):
+def run_evaluation(prompt_version: str = "v3", model: str = None):
     """Run the LLM on all evaluation cases and save outputs."""
     output_dir = Path("outputs")
     output_dir.mkdir(exist_ok=True)
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    model = model or "nvidia/nemotron-3-super-120b-a12b:free"
+
     results = {}
 
+    model_short = model.split("/")[-1].replace(":", "_")
     print(f"{'='*60}")
     print(f"Running evaluation with prompt {prompt_version}")
+    print(f"Model: {model}")
     print(f"Timestamp: {timestamp}")
     print(f"{'='*60}\n")
 
@@ -214,7 +226,7 @@ def run_evaluation(prompt_version: str = "v3"):
         print(f"Input preview: {case_data['notes'][:80]}...\n")
 
         try:
-            result = call_llm(case_data["notes"], prompt_version)
+            result = call_llm(case_data["notes"], prompt_version, model)
             results[case_id] = {
                 "status": "success",
                 "output": result,
@@ -224,7 +236,7 @@ def run_evaluation(prompt_version: str = "v3"):
             }
 
             # Save individual output
-            out_file = output_dir / f"{case_id}_{prompt_version}_output.md"
+            out_file = output_dir / f"{case_id}_{prompt_version}_{model_short}_output.md"
             out_file.write_text(
                 f"# {case_id}\n"
                 f"**Category:** {case_data['category']}\n"
@@ -248,9 +260,10 @@ def run_evaluation(prompt_version: str = "v3"):
             }
 
     # Save summary
-    summary_file = output_dir / f"eval_summary_{prompt_version}_{timestamp}.json"
+    summary_file = output_dir / f"eval_summary_{prompt_version}_{model_short}_{timestamp}.json"
     summary = {
         "prompt_version": prompt_version,
+        "model": model,
         "timestamp": timestamp,
         "total_cases": len(EVAL_CASES),
         "results": {
@@ -289,18 +302,62 @@ def interactive_mode(prompt_version: str = "v3"):
         print(f"Error: {e}")
 
 
+def run_multi_model_comparison(prompt_version: str = "v3"):
+    """Run evaluation across all free models and compare results."""
+    output_dir = Path("outputs")
+    output_dir.mkdir(exist_ok=True)
+
+    print(f"\n{'='*60}")
+    print(f"Multi-model comparison with prompt {prompt_version}")
+    print(f"Models to test: {len(MODELS)}")
+    print(f"{'='*60}")
+
+    all_results = {}
+    for model in MODELS:
+        print(f"\n{'~'*40}")
+        print(f"Testing: {model}")
+        print(f"{'~'*40}")
+        model_short = model.split("/")[-1].replace(":", "_")
+        results = run_evaluation(prompt_version, model)
+        all_results[model_short] = {
+            "model_id": model,
+            "total": len(results),
+            "success": sum(1 for r in results.values() if r["status"] == "success"),
+            "errors": sum(1 for r in results.values() if r["status"] == "error"),
+        }
+
+    # Save comparison summary
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    comp_file = output_dir / f"model_comparison_{prompt_version}_{timestamp}.json"
+    comp_file.write_text(json.dumps(all_results, indent=2))
+    print(f"\n{'='*60}")
+    print(f"Comparison summary:")
+    for model_short, stats in all_results.items():
+        print(f"  {model_short}: {stats['success']}/{stats['total']} successful")
+    print(f"Full comparison saved to {comp_file}")
+    return all_results
+
+
+
 def main():
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python app.py [run | eval | prompt v1|v2|v3]")
-        print("  run              Interactive mode — paste notes and get an entry")
-        print("  eval             Run full evaluation suite on all cases")
-        print("  prompt v1|v2|v3  Run evaluation with a specific prompt version")
+        print("Usage:")
+        print("  python app.py eval                          Run evaluation with v3 prompt (default model)")
+        print("  python app.py run                           Interactive mode - paste notes")
+        print("  python app.py prompt v1|v2|v3              Run evaluation with specific prompt")
+        print("  python app.py model MODEL_ID               Run eval with specific model")
+        print("  python app.py compare                       Run all free models, compare results")
+        print("  python app.py list-models                   List available free models")
+        print("")
+        print("Available models:")
+        for m in MODELS:
+            print(f"  - {m}")
         return
 
     command = sys.argv[1]
-    prompt_version = "v3"  # default
+    prompt_version = "v3"
 
     if command == "run":
         interactive_mode(prompt_version)
@@ -312,6 +369,17 @@ def main():
             print(f"Unknown prompt version: {prompt_version}. Use v1, v2, or v3.")
             return
         run_evaluation(prompt_version)
+    elif command == "compare":
+        run_multi_model_comparison(prompt_version)
+    elif command == "model" and len(sys.argv) >= 3:
+        model = sys.argv[2]
+        if model not in MODELS:
+            print(f"Warning: {model} not in default model list. Trying anyway...")
+        run_evaluation(prompt_version, model)
+    elif command == "list-models":
+        print("Available free models for evaluation:")
+        for m in MODELS:
+            print(f"  - {m}")
     else:
         print(f"Unknown command: {command}")
 

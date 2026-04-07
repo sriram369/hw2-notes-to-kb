@@ -1,0 +1,26 @@
+{
+  "nemotron-3-super-120b-a12b_free": {
+    "model_id": "nvidia/nemotron-3-super-120b-a12b:free",
+    "total": 5,
+    "success": 5,
+    "errors": 0
+  },
+  "qwen3.6-plus_free": {
+    "model_id": "qwen/qwen3.6-plus:free",
+    "total": 5,
+    "success": 3,
+    "errors": 2
+  },
+  "minimax-m2.5_free": {
+    "model_id": "minimax/minimax-m2.5:free",
+    "total": 5,
+    "success": 5,
+    "errors": 0
+  },
+  "step-3.5-flash_free": {
+    "model_id": "stepfun/step-3.5-flash:free",
+    "total": 5,
+    "success": 1,
+    "errors": 4
+  }
+}

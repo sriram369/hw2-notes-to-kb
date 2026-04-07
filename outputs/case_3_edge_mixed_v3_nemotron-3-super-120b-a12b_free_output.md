@@ -12,8 +12,25 @@ random things on my mind today: the omagent pricing tiers might need adjusting �
 Should NOT merge everything into one entry. Good output: splits into separate entries (business/tech vs personal), or flags personal items as out of scope.
 
 ## LLM Output
-The provided notes lack a specific date, which is required for the knowledge‑base entry format. Additionally, the notes mix business‑related topics (Omagent pricing, Docker Compose, Gemma model testing) with personal reminders (dentist call, phone battery). According to the guidelines, mixed topics should be split into separate entries or flagged as out of scope. Without a clear date and with the topic mix, a single coherent entry cannot be generated as requested.
+---
+title: Random thoughts and reminders
+date: 0000-00-00
+type: brainstorm
+tags: [pricing, docker, health, model-testing, battery]
+---
 
-**Missing information:**
-- Exact date of the notes (only “today” is referenced, but no calendar date is given).
-- Clarification on whether personal items should be treated as out of scope for a technical knowledge base or split into a separate personal‑focused entry
+# [[Random thoughts and reminders]]
+
+## Summary
+A collection of disparate notes covering pricing considerations for Omagent, technical issues with Docker Compose on M1, a personal dentist reminder, excitement about Google's Gemma model for tool use, and a observation about phone battery drain.
+
+## Key Details
+- Omagent pricing tiers might need adjusting; enterprise at $25k feels low
+- Docker compose file keeps failing on M1 architecture
+- Reminder: call dentist at 3pm Wednesday
+- New Gemma model from Google is surprisingly good for tool use; should test in sri-workflow
+- Phone battery dying too fast
+
+## Action Items
+- [ ] Adjust omagent pricing tiers (enterprise at 25k feels low) (assigned to: unknown, deadline: unknown)
+- [ ] Fix docker compose file failing on M1 (assigned toto
